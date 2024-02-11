@@ -43,11 +43,9 @@ def most_common(lst):
     # if the count of everything is 1 (meaning everything is unique)
     # return the average of the values
     if count == 1:
-        print("if", sum(common_things) / len(common_things))
         return sum(common_things) / len(common_things)
     # otherwise return the average of the most common values (can have multiple most common values)
     else:
-        print("else", round(sum(common_things) / len(common_things), 1))
         return round(sum(common_things) / len(common_things), 1)
 
 
@@ -81,7 +79,7 @@ def find_similar(lines, slopes, most):
 def center(og):
     # apply the filters and detect the lines with HoughLinesP
     frame = filters(og)
-    lines = cv2.HoughLinesP(frame, 1, np.pi / 180, threshold=120, minLineLength=100, maxLineGap=999999)
+    lines = cv2.HoughLinesP(frame, 1, np.pi / 180, threshold=130, minLineLength=100, maxLineGap=999999)
     cv2.rectangle(og, (500, 100), (1300, 1000), 255, 10)
     slopes = []
     avg_x1, avg_y1, avg_x2, avg_y2 = 0, 0, 0, 0
@@ -119,7 +117,6 @@ def center(og):
         # display the line
         cv2.line(og, (int(avg_x1), int(avg_y1)), (int(avg_x2), int(avg_y2)), (0, 255, 0), 10)
     else:
-        print("no lines")
         return og
     return og
 
