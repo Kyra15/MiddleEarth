@@ -28,13 +28,8 @@ def find_similar(lines, slopes, most):
 
     # if the slope is horizontal, then make it so that the slopes have to be within 2 of the most common slope
     for i in range(len(lines)):
-        # if -5 <= rounded[i] <= 5:
-        #     increment = 2
-        # # otherwise, make it so the slopes have to be within 100 of the most common slope
-        # # this is because vertical slopes have a higher margin of error and will vary more greatly with small movements
-        # # whereas horizontal slopes will have a small variation
-        # else:
-        #     increment = 60
+        # find the difference between the current slope and next slope in the list and make sure they are the same 
+        # to make sure that the lines are parallel
         try:
             if abs(rounded[i] - rounded[i + 1]) == 0:
                 good_lines.append(lines[i])
