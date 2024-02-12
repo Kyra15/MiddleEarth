@@ -21,10 +21,8 @@ def most_common(lst):
         try:
             x = round(x)
         except OverflowError:
-            x = 999
+            x = 99
         rounded.append(x)
-
-    print(rounded)
 
     count = 0
     common_things = set()
@@ -58,20 +56,23 @@ def find_similar(lines, slopes, most):
             x = round(x)
             rounded.append(x)
         except OverflowError:
-            rounded.append(999)
+            rounded.append(99)
 
     # if the slope is horizontal, then make it so that the slopes have to be within 2 of the most common slope
     for i in range(len(lines)):
-        if -10 <= rounded[i] <= 10:
+        if -5 <= rounded[i] <= 5:
             increment = 2
         # otherwise, make it so the slopes have to be within 100 of the most common slope
         # this is because vertical slopes have a higher margin of error and will vary more greatly with small movements
         # whereas horizontal slopes will have a small variation
         else:
-            increment = 100
+            increment = 60
         if float(most + increment) > rounded[i] > float(most - increment):
             good_lines.append(lines[i])
-
+    print("most", most)
+    print("lines", len(lines))
+    print("rounde", rounded)
+    print("good", len(good_lines))
     return good_lines
 
 
@@ -79,43 +80,40 @@ def find_similar(lines, slopes, most):
 def center(og):
     # apply the filters and detect the lines with HoughLinesP
     frame = filters(og)
-    lines = cv2.HoughLinesP(frame, 1, np.pi / 180, threshold=130, minLineLength=100, maxLineGap=999999)
+    lines = cv2.HoughLinesP(frame, 1, np.pi / 180, threshold=120, minLineLength=100, maxLineGap=999999999)
     cv2.rectangle(og, (500, 100), (1300, 1000), 255, 10)
     slopes = []
-    avg_x1, avg_y1, avg_x2, avg_y2 = 0, 0, 0, 0
+    mid = 0
     # find the slopes of each line detected
     if lines is not None:
         for i in lines:
             x1, y1, x2, y2 = i[0]
             try:
                 slopes.append(((y2 - y1) / (x2 - x1)))
-            except ZeroDivisionError:
-                slopes.append(999)
+            except Exception as e:
+                print(e)
+                slopes.append(99)
 
         # find the most common slope in the frame
         freq = most_common(slopes)
         # find the lines with similar slopes to the most common slope and display them
         good_lines = find_similar(lines, slopes, freq)
-        for i in good_lines:
-            x1, y1, x2, y2 = i[0]
-            cv2.line(og, (x1, y1), (x2, y2), (0, 0, 255), 10)
 
-            # add the coordinates of each line to a total sum
-            avg_x1 += x1
-            avg_y1 += y1
-            avg_x2 += x2
-            avg_y2 += y2
+        coord = []
+        for i in good_lines:
+            x1g, y1g, x2g, y2g = i[0]
+            cv2.line(og, (x1g, y1g), (x2g, y2g), (0, 0, 255), 10)
+            coord.append([[x1g, y1g], [x2g, y2g]])
 
         # to prevent a divide by zero error, check to make sure at least some lines were outputted
-        # calculate the average of all the endpoints of the outputted lines
-        if len(good_lines) > 0:
-            avg_x1 /= len(good_lines)
-            avg_y1 /= len(good_lines)
-            avg_x2 /= len(good_lines)
-            avg_y2 /= len(good_lines)
-
-        # display the line
-        cv2.line(og, (int(avg_x1), int(avg_y1)), (int(avg_x2), int(avg_y2)), (0, 255, 0), 10)
+        # calculate the average of two of the endpoints of the outputted lines
+        if len(coord) >= 2:
+            ax = int((coord[0][0][0] + coord[1][0][0]) / 2)
+            ay = int((coord[0][0][1] + coord[1][0][1]) / 2)
+            bx = int((coord[0][1][0] + coord[1][1][0]) / 2)
+            by = int((coord[0][1][1] + coord[1][1][1]) / 2)
+            # display the line
+            cv2.line(og, (ax, ay), (bx, by), (0, 255, 0), 10)
     else:
         return og
     return og
@@ -134,7 +132,7 @@ while video.isOpened():
 
         # show the frame
         cv2.imshow("Detected Frame", center_frame)
-        if cv2.waitKey(25) & 0xFF == ord('q'):
+        if cv2.waitKey(36) & 0xFF == ord('q'):
             break
     else:
         break
