@@ -1,4 +1,4 @@
-# MiddleEarth
+# MiddleLine
 
 Websites used: 
 Line Detection basics (lines 7-9) - https://www.geeksforgeeks.org/line-detection-python-opencv-houghline-method/
