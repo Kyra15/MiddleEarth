@@ -8,12 +8,10 @@ import math
 def filters(pic):
     bw = cv2.cvtColor(pic, cv2.COLOR_BGR2GRAY)
     thresh = cv2.threshold(bw, 165, 255, cv2.THRESH_BINARY)[1]
-    cv2.imshow("thresh", thresh)
-    canny_gauss_bw = cv2.Canny(thresh, 150, 200, apertureSize=3, L2gradient=True)
-    cv2.imshow("canny", canny_gauss_bw)
+    canny_thresh_bw = cv2.Canny(thresh, 150, 200, apertureSize=3, L2gradient=True)
     mask = np.zeros(pic.shape[:2], dtype="uint8")
     cv2.rectangle(mask, (500, 100), (1300, 1000), 255, -1)
-    masked = cv2.bitwise_and(canny_gauss_bw, canny_gauss_bw, mask=mask)
+    masked = cv2.bitwise_and(canny_thresh_bw, canny_thresh_bw, mask=mask)
     return masked
 
 
@@ -30,7 +28,13 @@ def find_similar(lines, slopes, most):
 
     # if the slope is horizontal, then make it so that the slopes have to be within 2 of the most common slope
     for i in range(len(lines)):
-        # find the difference between two slopes and make sure they are the same
+        # if -5 <= rounded[i] <= 5:
+        #     increment = 2
+        # # otherwise, make it so the slopes have to be within 100 of the most common slope
+        # # this is because vertical slopes have a higher margin of error and will vary more greatly with small movements
+        # # whereas horizontal slopes will have a small variation
+        # else:
+        #     increment = 60
         try:
             if abs(rounded[i] - rounded[i + 1]) == 0:
                 good_lines.append(lines[i])
@@ -103,6 +107,7 @@ def center(og):
             # loop through the good lines from the slopes
             for i in good_lines:
                 x1, y1, x2, y2 = i[0]
+                # print("lines", len(good_lines))
 
                 # Initialize a variable to check if the lines are too close
                 # find the distance between the new line points and the old line
@@ -121,6 +126,7 @@ def center(og):
             # to prevent a divide by zero error, check to make sure that at least 1 line was detected
             # calculate the average of two of the endpoints of the outputted lines
             if good_dist is not None:
+                # print("dist", len(good_dist))
                 for i in range(len(good_dist)):
                     cv2.line(og, (good_dist[i][0][0], good_dist[i][0][1]),
                              (good_dist[i][1][0], good_dist[i][1][1]), (0, 0, 255), 10, cv2.LINE_AA)
